@@ -1,0 +1,4 @@
+enum ProcessState {
+    READY,
+    PROCESSED
+}
