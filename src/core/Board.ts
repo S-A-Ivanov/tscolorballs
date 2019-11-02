@@ -8,13 +8,18 @@ class Board {
         this.width = width;
         this.height = height;
         this.tiles = Array<Array<TileState>>();
-        for (let n:number = 0; n < width; n++) {
-            this.tiles[n] = new Array<TileState>(height);
-            for (let m:number = 0; m < height; m++) {
+        this.resetBoard();        
+    }
+    public resetBoard():void{
+        for(let n:number = 0; n <this. width; n++){
+            this.tiles[n] = new Array<TileState>(this.height);
+
+            for(let m:number =0; m < this.height; m++){
                 this.tiles[n][m] = this.randomInteger(1, Board.TILE_TYPES_COUNT);
             }
         }
     }
+    
  
     private randomInteger(min:number, max:number) {
         let rand = min + Math.random() * (max + 1 - min);
