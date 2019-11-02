@@ -14,13 +14,17 @@ class Engine {
     private highScore:number;
 
     public constructor() {
+        this.score = 0;
+        this.highScore = 0;
+        this.board = new Board(Engine.BOARD_WIDTH, Engine.BOARD_HEIGHT);
         this.canvas = <HTMLCanvasElement>document
                 .getElementById("tscolorballscanvas");
-        let engine = this;
-        setTimeout(function() {engine.onStep();}, Engine.TICK_MILLISECONDS);
+        this.initGame();
+        let engine = this;        
         this.canvas.addEventListener("mousedown",
                 function(event) { engine.onClick(event) });
         this.readHighScoreFromStorage();
+        engine.onStep();
     }
 
     private readHighScoreFromStorage():void {
@@ -46,21 +50,34 @@ class Engine {
 
     private initGame():void {
         this.score = 0;
+        this.board.resetBoard();        
         this.situation = Situation.CLEAR_SCREEN;
-        this.board = new Board(Engine.BOARD_WIDTH, Engine.BOARD_HEIGHT);
-        this.situation = Situation.GAME;
+
     }
  
-    private onStep():void {
-        if (this.situation == Situation.ANIMATION) {
-            this.processGravity();
-        }
-        this.onPaint();
-        if (this.situation == Situation.CLEAR_SCREEN) {
-            this.initGame();
-        }
+    private onStep():void {        
         let engine = this;
         setTimeout(function () { engine.onStep(); }, Engine.TICK_MILLISECONDS);
+        let ctx:CanvasRenderingContext2D = <CanvasRenderingContext2D>this.canvas
+                .getContext("2d");
+        switch (this.situation) {
+            case Situation.ANIMATION:
+                this.processGravity();
+                this.paintGame(ctx);
+                break;
+            case Situation.CLEAR_SCREEN:
+                this.clearScreen(ctx);
+                this.situation = Situation.GAME;
+                break;
+            case Situation.GAME:
+                this.paintGame(ctx);
+                break;
+            case Situation.END_GAME:
+                this.paintGame(ctx);
+                this.paintEndGame(ctx);
+                break;
+        }
+        this.paintStatus(ctx);
         if (console) console.log("endOnStep");
     }
 
@@ -94,27 +111,17 @@ class Engine {
             }
         }
         if (movesCount == 0) {
-            this.situation = Situation.GAME;
+           if (!this.checkEndGame()) {
+                this.situation = Situation.END_GAME;
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    this.saveHighScoreToStorage();
+                }
+             }
+            else this.situation = Situation.GAME;
         }
     }
 
-
-    private onPaint():void {
-       let ctx:CanvasRenderingContext2D = <CanvasRenderingContext2D>this.canvas
-                .getContext("2d");
-        switch (this.situation) {
-            case Situation.CLEAR_SCREEN:
-                this.clearScreen(ctx);
-                break;
-            case Situation.GAME:
-                this.paintGame(ctx);
-                break;
-            case Situation.END_GAME:
-                this.paintEndGame(ctx);
-                break;
-        }
-        this.paintStatus(ctx);
-    }
     
     private paintEndGame(ctx:CanvasRenderingContext2D):void {
         ctx.fillStyle="#404040";
@@ -226,24 +233,17 @@ class Engine {
                     if (removedCount > 1) {
                         this.situation = Situation.ANIMATION;
                         this.score += removedCount * removedCount;
-                    }
-                    if (!this.checkEndGame()) {
-                       this.situation = Situation.END_GAME;
-                       if (this.score > this.highScore) {
-                           this.highScore = this.score;
-                           this.saveHighScoreToStorage();
-                       }
-                    }
+                    }                   
                 }
                 break;
             case Situation.END_GAME:
-                this.situation = Situation.CLEAR_SCREEN;
+                this.initGame();                
                 break;
         }
     }
 
     // Get X and Y position of the elm (from: vishalsays.wordpress.com)
-    private getElementPosition(elm):Point {
+    private getElementPosition(elm:any):Point {
         var x = elm.offsetLeft;        // set x to elm's offsetLeft
         var y = elm.offsetTop;         // set y to elm's offsetTop
 
@@ -319,8 +319,8 @@ class Engine {
     }
 
     private checkEndGame():boolean {
-        for (let n:number = 0; n < Engine.BOARD_WIDTH - 1; n++) {
-            for (let m:number = 0; m < Engine.BOARD_HEIGHT - 1; m++) {
+        for (let n:number = 0; n < Engine.BOARD_WIDTH; n++) {
+            for (let m:number = 0; m < Engine.BOARD_HEIGHT; m++) {
                 let tileState:TileState = this.board.getTileState(n, m);
                 if ((tileState != TileState.EMPTY) &&
                         ((tileState == this.board.getTileState(n + 1, m)) ||
