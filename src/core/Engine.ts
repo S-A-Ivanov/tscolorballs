@@ -2,7 +2,7 @@ class Engine {
     public static HIGHSCORE_KEY:string = "ru.urvanov.tscolorballs.highScore";
     public static BOARD_WIDTH:number = 10;
     public static BOARD_HEIGHT:number = 10;
-    public static TICK_MILLISECONDS = 50;
+    public static TICK_MILLISECONDS = 80;
     public static TILE_WIDTH:number = 32;
     public static TILE_HEIGHT:number = 32;
     public static EMPTY_COLOR:string = "#404040";
@@ -78,7 +78,7 @@ class Engine {
                 break;
         }
         this.paintStatus(ctx);
-        if (console) console.log("endOnStep");
+        //if (console) console.log("endOnStep");
     }
 
     private processGravity():void {
