@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
-        "outFile": "tscolorballs.js"
+        "target": "es6",
+        "outFile": "tscolorballs.js",
+        "strict": true,      /* Enable all strict type-checking options. */
     },
     "include": [
         "src/**/*"
