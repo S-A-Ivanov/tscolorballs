@@ -277,7 +277,7 @@ class Engine {
         pointsToProcess.push(new Point(tileX, tileY));
         let tileState:TileState = this.board.getTileState(tileX, tileY);
         while (pointsToProcess.length > 0) {
-            let point = pointsToProcess.pop();
+            let point = <Point>pointsToProcess.pop();
             a[point.x][point.y] = ProcessState.PROCESSED;
             toRemove.push(point);          
             if (point.x > 0) {
