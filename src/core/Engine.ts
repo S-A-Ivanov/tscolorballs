@@ -24,7 +24,7 @@ class Engine {
         this.canvas.addEventListener("mousedown",
                 function(event) { engine.onClick(event) });
         this.readHighScoreFromStorage();
-        engine.onStep();
+        this.onStep();
     }
 
     private readHighScoreFromStorage():void {
@@ -51,34 +51,31 @@ class Engine {
     private initGame():void {
         this.score = 0;
         this.board.resetBoard();        
-        this.situation = Situation.CLEAR_SCREEN;
+        this.situation = Situation.GAME;
 
     }
  
     private onStep():void {        
         let engine = this;
-        setTimeout(function () { engine.onStep(); }, Engine.TICK_MILLISECONDS);
+        
         let ctx:CanvasRenderingContext2D = <CanvasRenderingContext2D>this.canvas
                 .getContext("2d");
         switch (this.situation) {
             case Situation.ANIMATION:
+                setTimeout(function () { engine.onStep(); }, Engine.TICK_MILLISECONDS);                
                 this.processGravity();
                 this.paintGame(ctx);
-                break;
-            case Situation.CLEAR_SCREEN:
-                this.clearScreen(ctx);
-                this.situation = Situation.GAME;
-                break;
+                break;            
             case Situation.GAME:
                 this.paintGame(ctx);
                 break;
             case Situation.END_GAME:
                 this.paintGame(ctx);
-                this.paintEndGame(ctx);
+                this.paintEndGame(ctx);                
                 break;
         }
         this.paintStatus(ctx);
-        //if (console) console.log("endOnStep");
+        if (console) console.log("endOnStep");
     }
 
     private processGravity():void {
@@ -166,14 +163,12 @@ class Engine {
         ctx.fillRect(0, 0, Engine.BOARD_WIDTH * Engine.TILE_WIDTH,
                 Engine.BOARD_HEIGHT * Engine.TILE_HEIGHT);
     }
-    
+   
     private paintGame(ctx:CanvasRenderingContext2D):void {
+        this.clearScreen(ctx);
         for (let x:number = 0; x < Engine.BOARD_WIDTH; x++) {
             for (let y:number = 0; y < Engine.BOARD_HEIGHT; y++) {
-                switch (this.board.getTileState(x, y)) {
-                    case TileState.EMPTY:
-                        this.drawRect(ctx, x, y, Engine.EMPTY_COLOR);
-                        break;
+                switch (this.board.getTileState(x, y)) {                    
                     case TileState.RED:
                         this.drawCircle(ctx, x, y, "#ba4747");
                         break;
@@ -190,15 +185,7 @@ class Engine {
             }
         }
     }
-
-    private drawRect(ctx: CanvasRenderingContext2D,
-            x: number, y: number, color:string):void {
-        ctx.fillStyle = color;
-        ctx.fillRect(x * Engine.TILE_WIDTH, y * Engine.TILE_HEIGHT,
-            x * Engine.TILE_WIDTH + Engine.TILE_WIDTH,
-            y * Engine.TILE_HEIGHT + Engine.TILE_HEIGHT);
-    }
- 
+    
     private drawCircle(ctx: CanvasRenderingContext2D,
             x:number, y: number, color:string):void {
         ctx.beginPath();
@@ -220,10 +207,7 @@ class Engine {
 
         let mouseX = event.pageX - canvasPosition.x;
         let mouseY = event.pageY - canvasPosition.y;
-
-        let tileX = Math.floor(mouseX / Engine.TILE_WIDTH);
-        let tileY = Math.floor(mouseY / Engine.TILE_HEIGHT);              
-
+        this.onStep();
         switch (this.situation) {
             case Situation.GAME:
                 let tileX = Math.floor(mouseX / Engine.TILE_WIDTH);
@@ -232,12 +216,14 @@ class Engine {
                     let removedCount = this.removeSameBalls(tileX, tileY);
                     if (removedCount > 1) {
                         this.situation = Situation.ANIMATION;
+                        this.onStep();
                         this.score += removedCount * removedCount;
                     }                   
                 }
                 break;
             case Situation.END_GAME:
-                this.initGame();                
+                this.initGame();
+                this.onStep();                
                 break;
         }
     }
