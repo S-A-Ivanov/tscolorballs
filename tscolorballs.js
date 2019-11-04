@@ -4,9 +4,9 @@ class Board {
         this.width = width;
         this.height = height;
         this.tiles = Array();
-        this.resetBoard();
+        this.reset();
     }
-    resetBoard() {
+    reset() {
         for (let n = 0; n < this.width; n++) {
             this.tiles[n] = new Array(this.height);
             for (let m = 0; m < this.height; m++) {
@@ -65,7 +65,7 @@ class Engine {
     }
     initGame() {
         this.score = 0;
-        this.board.resetBoard();
+        this.board.reset();
         this.situation = Situation.GAME;
     }
     onStep() {
@@ -283,10 +283,13 @@ class Engine {
         for (let n = 0; n < Engine.BOARD_WIDTH; n++) {
             for (let m = 0; m < Engine.BOARD_HEIGHT; m++) {
                 let tileState = this.board.getTileState(n, m);
-                if ((tileState != TileState.EMPTY) &&
-                    ((tileState == this.board.getTileState(n + 1, m)) ||
-                        (tileState == this.board.getTileState(n, m + 1)))) {
-                    return true;
+                if ((tileState != TileState.EMPTY)) {
+                    if ((n + 1) < Engine.BOARD_WIDTH)
+                        if (tileState == this.board.getTileState(n + 1, m))
+                            return true;
+                    if ((m + 1) < Engine.BOARD_HEIGHT)
+                        if (tileState == this.board.getTileState(n, m + 1))
+                            return true;
                 }
             }
         }

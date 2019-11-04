@@ -8,9 +8,10 @@ class Board {
         this.width = width;
         this.height = height;
         this.tiles = Array<Array<TileState>>();
-        this.resetBoard();        
+        this.reset();        
     }
-    public resetBoard():void{
+
+    public reset():void{
         for(let n:number = 0; n <this. width; n++){
             this.tiles[n] = new Array<TileState>(this.height);
 
@@ -19,8 +20,7 @@ class Board {
             }
         }
     }
-    
- 
+
     private randomInteger(min:number, max:number) {
         let rand = min + Math.random() * (max + 1 - min);
         rand = Math.floor(rand);

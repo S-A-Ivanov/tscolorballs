@@ -50,7 +50,7 @@ class Engine {
 
     private initGame():void {
         this.score = 0;
-        this.board.resetBoard();        
+        this.board.reset();        
         this.situation = Situation.GAME;
 
     }
@@ -308,10 +308,11 @@ class Engine {
         for (let n:number = 0; n < Engine.BOARD_WIDTH; n++) {
             for (let m:number = 0; m < Engine.BOARD_HEIGHT; m++) {
                 let tileState:TileState = this.board.getTileState(n, m);
-                if ((tileState != TileState.EMPTY) &&
-                        ((tileState == this.board.getTileState(n + 1, m)) ||
-                        (tileState == this.board.getTileState(n, m + 1)))) {
-                    return true;
+                if ((tileState != TileState.EMPTY)){
+                    if ((n+1) < Engine.BOARD_WIDTH) 
+                        if(tileState == this.board.getTileState(n + 1, m)) return true;
+                    if ((m+1) < Engine.BOARD_HEIGHT)
+                        if(tileState == this.board.getTileState(n, m + 1)) return true;
                 }
             }
         }
